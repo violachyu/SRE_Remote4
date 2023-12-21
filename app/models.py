@@ -2,50 +2,62 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from app import app
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tracking.db'  # SQLite database for simplicity
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:0503Pincky!@localhost/SRE_Remote4'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-class TrackingEvent(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    sno = db.Column(db.String(20))
-    date = db.Column(db.Date)
-    time = db.Column(db.Time)
-    status = db.Column(db.String(50))
-    location_id = db.Column(db.Integer)
-    location_title = db.Column(db.String(50))
-
-class Recipient(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    address = db.Column(db.String(255))
-    phone = db.Column(db.String(15))
-
+# Location Model
 class Location(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(50))
-    city = db.Column(db.String(50))
-    address = db.Column(db.String(255))
+    Location_Id = db.Column(db.Integer, primary_key=True)
+    Location_Title = db.Column(db.String(50))
+    Location_City = db.Column(db.String(50))
+    Location_Address = db.Column(db.String(255))
+    Location_CreatedUser = db.Column(db.String(255), default='sysadmin')
+    Location_CreatedDatetime = db.Column(db.DateTime, default=datetime.utcnow)
+    Location_UpdatedUser = db.Column(db.String(255), default='sysadmin')
+    Location_UpdatedDatetime = db.Column(db.DateTime, default=datetime.utcnow)
+    Location_ValidFlag = db.Column(db.Boolean, default=True)
 
-class TrackingInfo(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    sno = db.Column(db.String(20), unique=True)
-    tracking_status = db.Column(db.String(50))
-    estimated_delivery = db.Column(db.Date)
-    recipient_id = db.Column(db.Integer, db.ForeignKey('recipient.id'))
-    current_location_id = db.Column(db.Integer, db.ForeignKey('location.id'))
+# Recipient Model
+class Recipient(db.Model):
+    Recipient_Id = db.Column(db.Integer, primary_key=True)
+    Recipient_Name = db.Column(db.String(100))
+    Recipient_Address = db.Column(db.String(255))
+    Recipient_Phone = db.Column(db.String(15))
+    Recipient_CreatedUser = db.Column(db.String(255), default='sysadmin')
+    Recipient_CreatedDatetime = db.Column(db.DateTime, default=datetime.utcnow)
+    Recipient_UpdatedUser = db.Column(db.String(255), default='sysadmin')
+    Recipient_Updated_Datetime = db.Column(db.DateTime, default=datetime.utcnow)
+    Recipient_ValidFlag = db.Column(db.Boolean, default=True)
 
-    recipient = db.relationship('Recipient', backref='tracking_info')
-    current_location = db.relationship('Location', backref='tracking_info')
+# ShippingInfo Model
+class ShippingInfo(db.Model):
+    ShippingInfo_Id = db.Column(db.Integer, primary_key=True)
+    ShippingInfo_SNO = db.Column(db.String(20), unique=True)
+    ShippingInfo_RecipientId = db.Column(db.Integer, db.ForeignKey('recipient.Recipient_Id'))
+    ShippingInfo_CreatedUser = db.Column(db.String(255), default='sysadmin')
+    ShippingInfo_CreatedDatetime = db.Column(db.DateTime, default=datetime.utcnow)
+    ShippingInfo_UpdatedUser = db.Column(db.String(255), default='sysadmin')
+    ShippingInfo_Updated_Datetime = db.Column(db.DateTime, default=datetime.utcnow)
+    ShippingInfo_ValidFlag = db.Column(db.Boolean, default=True)
 
-# Create tables in the database
-db.create_all()
+# TrackingEvent Model
+class TrackingEvent(db.Model):
+    TrackingEvent_Id = db.Column(db.Integer, primary_key=True)
+    TrackingEvent_ShippingInfoSNO = db.Column(db.String(20))
+    TrackingEvent_Date = db.Column(db.Date)
+    TrackingEvent_Time = db.Column(db.Time)
+    TrackingEvent_status = db.Column(db.String(50))
+    TrackingEvent_LocationId = db.Column(db.Integer, db.ForeignKey('location.Location_Id'))
+    TrackingEvent_CreatedUser = db.Column(db.String(255), default='sysadmin')
+    TrackingEvent_CreatedDatetime = db.Column(db.DateTime, default=datetime.utcnow)
+    TrackingEvent_UpdatedUser = db.Column(db.String(255), default='sysadmin')
+    TrackingEvent_Updated_Datetime = db.Column(db.DateTime, default=datetime.utcnow)
+    TrackingEvent_ValidFlag = db.Column(db.Boolean, default=True)
 
-
-
-# def __init__(self, name, city, addr,pin):
-#    self.name = name
-#    self.city = city
-#    self.addr = addr
-#    self.pin = pin
+if __name__ == '__main__':
+    # This will create the tables in the database based on the models
+    db.create_all()

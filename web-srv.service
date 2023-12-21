@@ -1,0 +1,10 @@
+[Unit]
+Description=Web-Srv app
+
+[Service]
+ExecStart= ~/home/ubuntu/SRE_Remote4/venv/gunicorn -w 1 -b 0.0.0.0:5000 run:app
+WorkingDirectory= ~/home/ubuntu/SRE_Remote4/app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
